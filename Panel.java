@@ -20,14 +20,28 @@ public class Panel extends JPanel
             for (int j=0; j < blocks[i].length; j++)
             {
                 Block block = blocks[i][j];
-                int r = 0;
-                int b = 0;
-                if (block.getElevation() <= 0)
-                    b += -block.getElevation();
-                else
-                    r += block.getElevation();
+                // int r = 0;
+                // int b = 0;
+                // if (block.getElevation() <= 0)
+                //     b += -block.getElevation();
+                // else
+                //     r += block.getElevation();
+                // if (b > 255)
+                //     b = 255;
+                // if (r > 255)
+                //     r = 255;
                 
-                buffer.setColor(new Color(r, 255, b));
+                // buffer.setColor(new Color(r, 255, b));
+
+                int col = block.getElevation();
+                col += 256;
+                col /= 2;
+                if (col > 255)
+                    col = 255;
+                else if (col < 0)
+                    col = 0;
+                buffer.setColor(new Color(col, col, col));
+
                 buffer.fillRect(i*blockSize, j*blockSize, blockSize, blockSize);
             }
     }

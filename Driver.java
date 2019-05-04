@@ -4,6 +4,7 @@ public class Driver
 {
     private static JFrame frame = new JFrame("Terrains");
     private static Map map = new Map(16);
+    
     public static void main(String[] args)
     {
         frame.setSize(512,512);
