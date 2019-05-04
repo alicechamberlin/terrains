@@ -1,7 +1,7 @@
 public class Terrain
 {
     int elevation;
-    //hi
+    //hi there
     public Terrain()
     {
         elevation = 0;
