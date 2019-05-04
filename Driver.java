@@ -1,9 +1,10 @@
 import javax.swing.JFrame;
+import java.awt.Container;
 
 public class Driver
 {
     private static JFrame frame = new JFrame("Terrains");
-    private static Map map = new Map(16);
+    private static Map map = new Map(64);
     
     public static void main(String[] args)
     {
@@ -14,7 +15,7 @@ public class Driver
 
     public static void updateFrame()
     {
-        frame.setContentPane(new Panel(map));
+        frame.setContentPane((Container) (new Panel(map)));
         frame.setVisible(true);
     }
 }
