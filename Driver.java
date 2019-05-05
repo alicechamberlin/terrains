@@ -4,7 +4,7 @@ import java.awt.Container;
 public class Driver
 {
     private static JFrame frame = new JFrame("Terrains");
-    private static Map map = new Map(64);
+    private static Map map = new Map(32);
     
     public static void main(String[] args)
     {

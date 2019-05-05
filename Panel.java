@@ -1,62 +1,91 @@
-import java.awt.image.BufferedImage;
 import javax.swing.JPanel;
+import java.awt.image.BufferedImage;
 import java.awt.Graphics;
 import java.awt.Color;
+import javax.imageio.ImageIO;
+import java.io.File;
+import java.io.IOException;
 
 public class Panel extends JPanel
 {
     private static final long serialVersionUID = 1L;
     private final int PANEL_SIZE = 512;
     private BufferedImage bImage;
+    private BufferedImage[] waterTextures;
+    private BufferedImage[] landTextures;
 
     public Panel(Map map)
     {
+        //Initialize basic panel information
         int blockSize = PANEL_SIZE / map.getSize();
         bImage = new BufferedImage(PANEL_SIZE, PANEL_SIZE, BufferedImage.TYPE_INT_RGB);
         Graphics buffer = bImage.getGraphics();
 
+        //Create arrays of images to illustrate various block elevations
+        String root = "/Users/alicechamberlin/Google Drive/AP Computer Science/CS Code/Terrains 1.0/textures";
+        waterTextures = new BufferedImage[3];
+        for (int i=0; i<3; i++)
+        {
+            BufferedImage texture = null;
+            try {
+                File f = new File(root + "/" + "bluewater-"+i+".png");
+                texture = ImageIO.read(f);
+            } catch (IOException e) {
+                System.out.println(e);
+            }
+            waterTextures[i] = texture;
+        }
+        landTextures = new BufferedImage[15];
+        for (int i=0; i<15; i++)
+        {
+            BufferedImage texture = null;
+            try {
+                File f = new File(root + "/" + "elevation-"+i+".png");
+                texture = ImageIO.read(f);
+            } catch (IOException e) {
+                System.out.println(e);
+            }
+            landTextures[i] = texture;
+        }
+
         Block[][] blocks = map.getBlocks();
+
+        //Determine the highest and lowest elevations on the map so that the colors can be scaled accordingly
+        int maxEl = blocks[0][0].getElevation();
+        int minEl = blocks[0][0].getElevation();
+        for (Block[] row : blocks)
+            for (Block b : row)
+            {
+                if (b.getElevation() > maxEl)
+                    maxEl = b.getElevation();
+                else if (b.getElevation() < minEl)
+                    minEl = b.getElevation();
+            }
+
+        //Assign each block an icon based on its elevation
         for (int i = 0; i < blocks.length; i++)
             for (int j=0; j < blocks[i].length; j++)
             {
                 Block block = blocks[i][j];
-                // int r = 0;
-                // int b = 0;
-                // if (block.getElevation() <= 0)
-                //     b += -block.getElevation();
-                // else
-                //     r += block.getElevation();
-                // if (b > 255)
-                //     b = 255;
-                // if (r > 255)
-                //     r = 255;
-                
-                // buffer.setColor(new Color(r, 255, b));
-
                 int el = block.getElevation();
-                int r = 0;
-                int g = 0;
-                int b = 0;
+
+                BufferedImage texture;
                 if (el < 0)
                 {
-                    r = 0;
-                    g = 0;
-                    b = 255;
+                    int index = 2 - el / (minEl / 3);
+                    if (index < 0)
+                        index = 0;
+                    texture = waterTextures[index];
                 }
                 else
                 {
-                    b = 127;
-                    g = 255;
-                    r += el*2;
-                    b -= el*2;
-                    if (r > 255)
-                        r = 255;
-                    if (b < 0)
-                        b = 0;
+                    int index = el / (maxEl / 15);
+                    if (index > 14)
+                        index = 14;
+                    texture = landTextures[index];
                 }
-                buffer.setColor(new Color(r, g, b));
 
-                buffer.fillRect(i*blockSize, j*blockSize, blockSize, blockSize);
+                buffer.drawImage(texture, i*blockSize, j*blockSize, blockSize, blockSize, Color.BLACK, null);
             }
     }
 

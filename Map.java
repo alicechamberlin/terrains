@@ -17,9 +17,6 @@ public class Map
     private void generateElevations(int startX, int startY, int size, int elevationRange)
     {
         int maxChange = (int) (rand.nextDouble() * elevationRange * 2) - elevationRange;
-        System.out.println(startX+", "+startY+" "+size);
-        System.out.println("maxChange :"+maxChange);
-
 
         int delta; //The difference in height change between one block and its neighbors in the section
         if (size > 1)
