@@ -22,7 +22,7 @@ public class Panel extends JPanel
         Graphics buffer = bImage.getGraphics();
 
         //Create arrays of images to illustrate various block elevations
-        String root = "/Users/alicechamberlin/Google Drive/AP Computer Science/CS Code/Terrains 1.0/textures";
+        String root = "file/path";
         waterTextures = new BufferedImage[3];
         for (int i=0; i<3; i++)
         {
