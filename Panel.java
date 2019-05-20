@@ -42,7 +42,7 @@ public class Panel extends JPanel implements MouseListener
         zoomOutSelected = out;
 
         //Create arrays of images to illustrate various block elevations
-        String root = "/Users/alicechamberlin/Google Drive/AP Computer Science/CS Code/Terrains 1.0/textures";
+        String root = "file/path";
         waterTextures = new BufferedImage[3];
         for (int i=0; i<3; i++)
         {
@@ -208,6 +208,7 @@ public class Panel extends JPanel implements MouseListener
     {
         g.drawImage(bImage, 0, 0, getWidth(), getHeight(), null);
     }
+<<<<<<< HEAD
 
     public void mouseClicked(MouseEvent e)
     {
@@ -253,3 +254,6 @@ public class Panel extends JPanel implements MouseListener
         
     }
 }
+=======
+}
+>>>>>>> 6643ba9bea54aa082e5caa628bb8a92ef584ae02
