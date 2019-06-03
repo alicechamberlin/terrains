@@ -1,6 +1,6 @@
 public class Block
 {
-    int elevation; //value between -255 and 255
+    int elevation;
     public Block()
     {
         elevation = 0;

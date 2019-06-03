@@ -1,16 +1,29 @@
 
 public class Button
 {
-    private int x1;
-    private int y1;
-    private int x2;
-    private int y2;
-    public Button(int x1, int  y1, int x2, int y2)
+    private int minX, maxX, minY, maxY;
+    private final int[] X_POINTS, Y_POINTS;
+    
+    public Button(int[] xPoints, int[] yPoints)
     {
-        this.x1 = x1;
-        this.y1 = y1;
-        this.x2 = x2;
-        this.y2 = y2;
+        X_POINTS = xPoints;
+        Y_POINTS = yPoints;
+        
+        minX = xPoints[0];
+        maxX = xPoints[0];
+        for (int x : xPoints)
+            if (x < minX)
+                minX = x;
+            else if (x > maxX)
+                maxX = x;
+                
+        minY = yPoints[0];
+        maxY = yPoints[0];
+        for (int y : yPoints)
+            if (y < minY)
+                minY = y;
+            else if (y > maxY)
+                maxY = y;
     }
     
     /**
@@ -20,7 +33,7 @@ public class Button
      */
     public boolean contains(int x, int y)
     {
-        if (x1 <= x && x < x2 && y1 <= y && y < y2)
+        if (minX <= x && x < maxX && minY <= y && y < maxY)
         {
             return true;
         }
@@ -28,20 +41,36 @@ public class Button
     }
     
     /**
-     * @return an array with size 2 holding the values {x1, x2}
+     * @return an array with size 2 holding the values {minX, maxX}
      */
-    public int[] getXs()
+    public int[] getXBounds()
     {
-        int[] coords = {x1,x2};
+        int[] coords = {minX,maxX};
         return coords;
     }
     
     /**
-     * @return an array with size 2 holding the values {y1, y2}
+     * @return an array with size 2 holding the values {minY, maxY}
      */
-    public int[] getYs()
+    public int[] getYBounds()
     {
-        int[] coords = {y1,y2};
+        int[] coords = {minY,maxY};
         return coords;
+    }
+    
+    /**
+     * @return the original xPoints given
+     */
+    public int[] getXPoints()
+    {
+        return X_POINTS;
+    }
+    
+    /**
+     * @return the original yPoints given
+     */
+    public int[] getYPoints()
+    {
+        return Y_POINTS;
     }
 }

@@ -14,19 +14,13 @@ public class Panel extends JPanel implements MouseListener
     private static final long serialVersionUID = 1L;
     private final int PANEL_SIZE = 512;
     private BufferedImage bImage;
-    private BufferedImage[] waterTextures;
-    private BufferedImage[] landTextures;
     private int blockSize;
     private int x, y;
-    private Button zoomInButton;
-    private Button zoomOutButton;
-    private Button downButton;
-    private Button upButton;
-    private Button rightButton;
-    private Button leftButton;
     private boolean zoomInSelected;
     private boolean zoomOutSelected;
     private Button[] buttons;
+    private BufferedImage[] waterTextures, landTextures;
+    private final String ROOT = "file/path";
 
     public Panel(Map map, int x, int y, int zoom, boolean in, boolean out, int seaLevel)
     {
@@ -42,31 +36,8 @@ public class Panel extends JPanel implements MouseListener
         zoomOutSelected = out;
 
         //Create arrays of images to illustrate various block elevations
-        String root = "file/path";
-        waterTextures = new BufferedImage[3];
-        for (int i=0; i<3; i++)
-        {
-            BufferedImage texture = null;
-            try {
-                File f = new File(root + "/" + "bluewater-"+i+".png");
-                texture = ImageIO.read(f);
-            } catch (IOException e) {
-                System.out.println(e);
-            }
-            waterTextures[i] = texture;
-        }
-        landTextures = new BufferedImage[15];
-        for (int i=0; i<15; i++)
-        {
-            BufferedImage texture = null;
-            try {
-                File f = new File(root + "/" + "elevation-"+i+".png");
-                texture = ImageIO.read(f);
-            } catch (IOException e) {
-                System.out.println(e);
-            }
-            landTextures[i] = texture;
-        }
+        waterTextures = getWaterTextures();
+        landTextures = getLandTextures();
 
         Block[][] blocks = map.getBlocks();
 
@@ -81,7 +52,7 @@ public class Panel extends JPanel implements MouseListener
                 else if (b.getElevation() < minEl)
                     minEl = b.getElevation();
             }
-
+        
         //Assign each block an icon based on its elevation
         int startX = x;
         int startY = y;
@@ -91,169 +62,271 @@ public class Panel extends JPanel implements MouseListener
             startY = 0;
         for (int i = startX; i < x+zoom && i < blocks.length; i++)
         {
-            //if (i >= blocks.length)
-            //    break;
             for (int j = startY; j < y+zoom && j < blocks[i].length; j++)
             {
-                //if (j >= blocks[i].length)
-                //    break;
                 Block block = blocks[i][j];
-                int el = block.getElevation();
+                BufferedImage texture = this.getTexture(block, maxEl, minEl, seaLevel);
 
-                BufferedImage texture;
-                if (el < 0)
-                {
-                    int index;
-                    if (minEl/3 != 0)
-                        index = 2 - el / (minEl / 3);
-                    else
-                        index = 2;
-                        
-                    if (index < 0)
-                        index = 0;
-                    texture = waterTextures[index];
-                }
-                else
-                {
-                    int index;
-                    if (maxEl/15 != 0)
-                        index = el / (maxEl / 15);
-                    else
-                        index = 0;
-                    
-                    if (index > 14)
-                        index = 14;
-                    texture = landTextures[index];
-                }
-
-                //Draw blocks on image
+                //Draw block on image
                 buffer.drawImage(texture, (i-x)*blockSize, (j-y)*blockSize, blockSize, blockSize, Color.BLACK, null);
-            
-                //Draw buttons on image
-                Color mainCol1 = Color.BLUE;
-                Color textCol1 = Color.WHITE;
-                Color mainCol2 = Color.BLUE;
-                Color textCol2 = Color.WHITE;
-                if (zoomInSelected)
-                {
-                    mainCol1 = Color.WHITE;
-                    textCol1 = Color.BLUE;
-                }
-                if (zoomOutSelected)
-                {
-                    mainCol2 = Color.WHITE;
-                    textCol2 = Color.BLUE;
-                }
-                buffer.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 25));
-                
-                int zoomButtonsX = 480;
-                int zoomButtonsSize = 20;
-                int zoomInButtonY = 50;
-                int zoomOutButtonY = 80;
-                
-                zoomInButton = new Button(zoomButtonsX, zoomInButtonY, zoomButtonsX+zoomButtonsSize, zoomInButtonY+zoomButtonsSize);
-                zoomOutButton = new Button(zoomButtonsX, zoomOutButtonY, zoomButtonsX+zoomButtonsSize, zoomOutButtonY+zoomButtonsSize);
-                
-                buffer.setColor(mainCol1);
-                buffer.fillRect(zoomButtonsX, zoomInButtonY, zoomButtonsSize, zoomButtonsSize);
-                buffer.setColor(textCol1);
-                buffer.drawString("+", zoomButtonsX+2, zoomInButtonY+18);
-                
-                buffer.setColor(mainCol2);
-                buffer.fillRect(zoomButtonsX, zoomOutButtonY, zoomButtonsSize, zoomButtonsSize);
-                buffer.setColor(textCol2);
-                buffer.drawString("-", zoomButtonsX+5, zoomOutButtonY+16);
-                
-                buffer.setColor(Color.YELLOW);
-                int[] downXPoints = {246, 256, 266};
-                int[] downYPoints = {472, 489, 472};
-                downButton = new Button(downXPoints[0], downYPoints[0], downXPoints[2], downYPoints[1]);
-                buffer.fillPolygon(downXPoints, downYPoints, 3);
-                
-                int[] upXPoints = {246, 256, 266};
-                int[] upYPoints = {40, 23, 40};
-                upButton = new Button(upXPoints[0], upYPoints[1], upXPoints[2], upYPoints[2]);
-                buffer.fillPolygon(upXPoints, upYPoints, 3);
-                
-                int[] leftXPoints = {40, 23, 40};
-                int[] leftYPoints = {246, 256, 266};
-                leftButton = new Button(leftXPoints[1], leftYPoints[0], leftXPoints[2], leftYPoints[2]);
-                buffer.fillPolygon(leftXPoints, leftYPoints, 3);
-                
-                int[] rightXPoints = {472, 489, 472};
-                int[] rightYPoints = {246, 256, 266};
-                rightButton = new Button(rightXPoints[0], rightYPoints[0], rightXPoints[1], rightYPoints[2]);
-                buffer.fillPolygon(rightXPoints, rightYPoints, 3);
-                
-                buttons = new Button[6];
-                buttons[0] = zoomInButton;
-                buttons[1] = zoomOutButton;
-                buttons[2] = downButton;
-                buttons[3] = upButton;
-                buttons[4] = leftButton;
-                buttons[5] = rightButton;
-                
-                // buffer.setColor(Color.WHITE);
-                // for (Button button : buttons)
-                // {
-                    // int[] xPoints = {button.getXs()[0], button.getXs()[1], button.getXs()[1], button.getXs()[0]};
-                    // int[] yPoints = {button.getYs()[0], button.getYs()[0], button.getYs()[1], button.getYs()[1]};
-                    // buffer.drawPolygon(xPoints, yPoints, 4);
-                // }
             }
         }
+        
+        //Create and draw buttons
+        buttons = new Button[8];
+        buttons[0] = createZoomInButton();
+        buttons[1] = createZoomOutButton();
+        buttons[2] = createDownButton();
+        buttons[3] = createUpButton();
+        buttons[4] = createLeftButton();
+        buttons[5] = createRightButton();
+        buttons[6] = createWaterUpButton();
+        buttons[7] = createWaterDownButton();
+        
+        //Set up colors for highlighting of zoom in and out buttons
+        Color mainCol1 = Color.BLUE;
+        Color textCol1 = Color.WHITE;
+        Color mainCol2 = Color.BLUE;
+        Color textCol2 = Color.WHITE;
+        if (zoomInSelected)
+        {
+            mainCol1 = Color.WHITE;
+            textCol1 = Color.BLUE;
+        }
+        if (zoomOutSelected)
+        {
+            mainCol2 = Color.WHITE;
+            textCol2 = Color.BLUE;
+        }
+        buffer.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 25));
+        
+        //Draw zoom in button
+        buffer.setColor(mainCol1);
+        buffer.fillPolygon(buttons[0].getXPoints(), buttons[0].getYPoints(), 4);
+        buffer.setColor(textCol1);
+        buffer.drawString("+", buttons[0].getXPoints()[0]+2, buttons[0].getYPoints()[0]+18);
+        
+        //Draw zoom out button
+        buffer.setColor(mainCol2);
+        buffer.fillPolygon(buttons[1].getXPoints(), buttons[1].getYPoints(), 4);
+        buffer.setColor(textCol2);
+        buffer.drawString("-",  buttons[1].getXPoints()[0]+5, buttons[1].getYPoints()[0]+16);
+        
+        //Draw direction buttons
+        buffer.setColor(Color.YELLOW);
+        for (int n = 2; n < 6; n++)
+            buffer.fillPolygon(buttons[n].getXPoints(), buttons[n].getYPoints(), 3);
+        
+        //Draw sea level change buttons
+        buffer.setColor(Color.RED);
+        for (int n = 6; n < 8; n++)
+            buffer.fillPolygon(buttons[n].getXPoints(), buttons[n].getYPoints(), 3);
+        
+        
+        //Draw the areas in which you can click for a button to be pressed
+        // buffer.setColor(Color.WHITE);
+        // for (Button button : buttons)
+        // {
+            // int[] xPoints = {button.getXBounds()[0], button.getXBounds()[1], button.getXBounds()[1], button.getXBounds()[0]};
+            // int[] yPoints = {button.getYBounds()[0], button.getYBounds()[0], button.getYBounds()[1], button.getYBounds()[1]};
+            // buffer.drawPolygon(xPoints, yPoints, 4);
+        // }
     }
 
+    /**
+     * Draws bImage on the panel. Called automatically.
+     */
     public void paintComponent(Graphics g)
     {
         g.drawImage(bImage, 0, 0, getWidth(), getHeight(), null);
     }
-<<<<<<< HEAD
 
+    /**
+     * Checks if the user has clicked a button or zoomed in/out and calls the appropriate method
+     */
     public void mouseClicked(MouseEvent e)
     {
+        System.out.println("clicked at ("+e.getX()+", "+e.getY()+")");
+        
         int viewX = e.getX()/blockSize;
         int viewY = e.getY()/blockSize;
         int mapX = viewX + x;
         int mapY = viewY + y;
-        if (zoomInButton.contains(e.getX(), e.getY()))
+        //I could create a for loop that traverses buttons and calls
+        //.contains(e.getX(), e.getY()) on each one, but I can't store 
+        //the method that it calls as a data field of the button, so I 
+        //can't do different things for each button
+        if (buttons[0].contains(e.getX(), e.getY()))
             Driver.zoomInPress();
-        else if (zoomOutButton.contains(e.getX(), e.getY()))
+        else if (buttons[1].contains(e.getX(), e.getY()))
             Driver.zoomOutPress();
-        else if (downButton.contains(e.getX(), e.getY()))
+        else if (buttons[2].contains(e.getX(), e.getY()))
             Driver.moveView(Driver.DOWN);
-        else if (upButton.contains(e.getX(), e.getY()))
+        else if (buttons[3].contains(e.getX(), e.getY()))
             Driver.moveView(Driver.UP);
-        else if (leftButton.contains(e.getX(), e.getY()))
+        else if (buttons[4].contains(e.getX(), e.getY()))
             Driver.moveView(Driver.LEFT);
-        else if (rightButton.contains(e.getX(), e.getY()))
+        else if (buttons[5].contains(e.getX(), e.getY()))
             Driver.moveView(Driver.RIGHT);
+        else if (buttons[6].contains(e.getX(), e.getY()))
+            Driver.increaseWaterLevel();
+        else if (buttons[7].contains(e.getX(), e.getY()))
+            Driver.decreaseWaterLevel();
         else if (zoomInSelected)
             Driver.zoomIn(mapX, mapY, viewX, viewY);
         else if (zoomOutSelected)
             Driver.zoomOut(mapX, mapY, viewX, viewY);
     }
 
-    public void mouseEntered(MouseEvent e)
-    {
-        
-    }
+    /**
+     * No action is performed
+     */
+    public void mouseEntered(MouseEvent e) {}
 
-    public void mouseExited(MouseEvent e)
-    {
-        
-    }
+    /**
+     * No action is performed
+     */
+    public void mouseExited(MouseEvent e) {}
 
-    public void mousePressed(MouseEvent e)
-    {
-        
-    }
+    /**
+     * No action is performed
+     */
+    public void mousePressed(MouseEvent e) {}
 
-    public void mouseReleased(MouseEvent e)
+    /**
+     * No action is performed
+     */
+    public void mouseReleased(MouseEvent e) {}
+    
+    private BufferedImage[] getWaterTextures()
     {
+        BufferedImage[] waterTextures = new BufferedImage[3];
+        for (int i=0; i<3; i++)
+        {
+            BufferedImage texture = null;
+            try {
+                File f = new File(ROOT + "/" + "bluewater-"+i+".png");
+                texture = ImageIO.read(f);
+            } catch (IOException e) {
+                System.out.println(e);
+            }
+            waterTextures[i] = texture;
+        }
+        return waterTextures;
+    }
+    
+    private BufferedImage[] getLandTextures()
+    {
+        BufferedImage[] landTextures = new BufferedImage[15];
+        for (int i=0; i<15; i++)
+        {
+            BufferedImage texture = null;
+            try {
+                File f = new File(ROOT + "/" + "elevation-"+i+".png");
+                texture = ImageIO.read(f);
+            } catch (IOException e) {
+                System.out.println(e);
+            }
+            landTextures[i] = texture;
+        }
+        return landTextures;
+    }
+    
+    private BufferedImage getTexture(Block block, int maxEl, int minEl, int seaLevel)
+    {
+        int el = block.getElevation();
+        BufferedImage texture;
+        int index;
+        int increment;
+        if (el <= seaLevel)
+        {
+            //Get water texture
+            increment = (minEl-seaLevel)/waterTextures.length;
+            if (increment != 0)
+                index = waterTextures.length-1 - (el-seaLevel) / increment;
+            else
+                index = 0;
+                
+            if (index < 0)
+                index = 0;
+            texture = waterTextures[index];
+        }
+        else
+        {
+            //Get land texture
+            increment = (maxEl-seaLevel)/landTextures.length;
+            if (increment != 0)
+                index = (el-seaLevel) / increment;
+            else
+                index = landTextures.length - 1;
+            if (index >= landTextures.length)
+                index = landTextures.length - 1;
+            texture = landTextures[index];
+        }
+        return texture;
+    }
+    
+    private Button createUpButton()
+    {
+        int[] xPoints = {246, 256, 266};
+        int[] yPoints = {40, 23, 40};
         
+        return new Button(xPoints, yPoints);
+    }
+    
+    private Button createDownButton()
+    {
+        int[] xPoints = {246, 256, 266};
+        int[] yPoints = {472, 489, 472};
+        
+        return new Button(xPoints, yPoints);
+    }
+    
+    private Button createLeftButton()
+    {
+        int[] xPoints = {40, 23, 40};
+        int[] yPoints = {246, 256, 266};
+        
+        return new Button(xPoints, yPoints);
+    }
+    
+    private Button createRightButton()
+    {
+        int[] xPoints = {472, 489, 472};
+        int[] yPoints = {246, 256, 266};
+        
+        return new Button(xPoints, yPoints);
+    }
+    
+    private Button createZoomInButton()
+    {
+        int[] xPoints = {480, 480, 500, 500};
+        int[] yPoints = {50, 70, 70, 50};
+        
+        return new Button(xPoints, yPoints);
+    }
+    
+    private Button createZoomOutButton()
+    {
+        int[] xPoints = {480, 480, 500, 500};
+        int[] yPoints = {80, 100, 100, 80};
+        
+        return new Button(xPoints, yPoints);
+    }
+    
+    private Button createWaterUpButton()
+    {
+        int[] xPoints = {480, 490, 500};
+        int[] yPoints = {150, 130, 150};
+        
+        return new Button(xPoints, yPoints);
+    }
+    
+    private Button createWaterDownButton()
+    {
+        int[] xPoints = {480, 490, 500};
+        int[] yPoints = {170, 190, 170};
+        
+        return new Button(xPoints, yPoints);
     }
 }
-=======
-}
->>>>>>> 6643ba9bea54aa082e5caa628bb8a92ef584ae02

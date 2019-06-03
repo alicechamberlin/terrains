@@ -2,8 +2,10 @@ import java.util.Random;
 
 public class Map
 {
-    Random rand;
-    Block[][] blocks;
+    private Random rand;
+    private Block[][] blocks;
+    //private final double[] fakeRandom = {0.1, 0.7, 0.3, 0.5, 0.9, 0, 0.2, 0.8, 0.4, 0.6};
+    
     public Map(int size)
     {
         rand = new Random();
@@ -14,10 +16,13 @@ public class Map
         generateElevations(0, 0, blocks.length, 256);
     }
 
+    /**
+     * Generate pseudo-random maps by adding or subtracting "pyramids" of random heights to subdivisions of the map
+     */
     private void generateElevations(int startX, int startY, int size, int elevationRange)
     {
         int maxChange = (int) (rand.nextDouble() * elevationRange * 2) - elevationRange;
-
+        
         int delta; //The difference in height change between one block and its neighbors in the section
         if (size > 1)
             delta = maxChange / (size / 2);
@@ -45,10 +50,17 @@ public class Map
         }
     }
 
+    /**
+     * @return the 2d square array of Blocks that make up the map
+     */
     public Block[][] getBlocks()
     {
         return blocks;
     }
+    
+    /**
+     * @return the length of one side of the square map in Blocks
+     */
     public int getSize()
     {
         return blocks.length;

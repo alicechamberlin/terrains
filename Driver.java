@@ -7,6 +7,7 @@ public class Driver
     private static Map map = new Map(32);
     private static int x;
     private static int y;
+    private static int waterLevel;
     private static int zoom;
     private static boolean zoomInSelected;
     private static boolean zoomOutSelected;
@@ -21,9 +22,11 @@ public class Driver
         //For some reason I need to set the size to (529,552) in order for it to actually be (512,512)
         frame.setSize(529,552);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setResizable(false);
         x = 0;
         y = 0;
         zoom = 32;
+        waterLevel = 0;
         zoomInSelected = false;
         zoomOutSelected = false;
         updateFrame();
@@ -31,7 +34,7 @@ public class Driver
 
     public static void updateFrame()
     {
-        Container panel = new Panel(map, x, y, zoom, zoomInSelected, zoomOutSelected, 0);
+        Container panel = new Panel(map, x, y, zoom, zoomInSelected, zoomOutSelected, waterLevel);
         frame.setContentPane(panel);
         frame.setVisible(true);
     }
@@ -75,6 +78,18 @@ public class Driver
             x--;
         else if (direction == RIGHT && x+1+zoom < 32)
             x++;
+        updateFrame();
+    }
+    
+    public static void increaseWaterLevel()
+    {
+        waterLevel++;
+        updateFrame();
+    }
+    
+    public static void decreaseWaterLevel()
+    {
+        waterLevel--;
         updateFrame();
     }
     
